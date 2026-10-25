@@ -178,6 +178,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private int wifiIcon;
     /** The pills have been filled in once; later resumes refresh them after the first frame. */
     private boolean pillsShown;
+    /** No Wi-Fi/VPN work when neither a visible pill nor its menu uses it. */
+    private boolean networkStatusNeeded;
+    private boolean networkCallbacksRegistered;
+    private boolean inputCallbackRegistered;
+    private boolean minuteUpdatesNeeded;
     private TextView shamsiDate;
     /** lunar_date: the lunisolar date under the date line, and the time zone it is computed for. */
     private TextView lunarDate;
@@ -353,6 +358,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             updateClockVisibility();
+            scheduleHomeRefresh();
         }
     };
     private final Runnable minuteTick = new Runnable() {
@@ -364,10 +370,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // signal level, so only it needs this minute's binder calls (about 7 ms on the UI thread).
             if (festive) updateWifiLabel();
             sky.update();
-            wallpaperPlayer.update();
-            handler.postDelayed(this, MINUTE_MS);
+            if (wallpaperPlayer != null) wallpaperPlayer.update();
+            scheduleHomeRefresh();
         }
     };
+
+    private void scheduleHomeRefresh() {
+        handler.removeCallbacks(minuteTick);
+        if (started) handler.postDelayed(minuteTick, HomeRefresh.nextDelayMillis(
+                minuteUpdatesNeeded, System.currentTimeMillis(), java.time.ZoneId.systemDefault()));
+    }
 
     @Override
     protected void attachBaseContext(android.content.Context base) {
@@ -380,7 +392,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         setContentView(R.layout.activity_main);
         density = getResources().getDisplayMetrics().density;
         // config.xml, overlaid by config.json from a pushed theme (see Config and tools/theme.sh).
-        Config cfg = Config.load(this);
+        android.os.Trace.beginSection("GuestTV.Config");
+        Config cfg;
+        try { cfg = Config.load(this); }
+        finally { android.os.Trace.endSection(); }
         appLibrarySelection = cfg.appLibrarySelection;
         // restore_key_services: after a force stop, put back the remote's accessibility helpers that Android took
         // off the list (needs WRITE_SECURE_SETTINGS, granted by build-and-install with RESTORE_KEY_SERVICES=1).
@@ -419,7 +434,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // black under it is a second full-screen fill on every frame for nothing. The starting window still uses
         // the theme's background, so launch looks the same.
         getWindow().setBackgroundDrawable(null);
-        wallpaperPlayer = new WallpaperPlayer(this, root, cfg);
+        if (cfg.wallpaperEnabled && !cfg.wallpapers.isEmpty()) {
+            wallpaperPlayer = new WallpaperPlayer(this, root, cfg);
+        }
+        minuteUpdatesNeeded = festive || cfg.skyIntensity > 0 || wallpaperPlayer != null
+                || !cfg.raceCalendar.isEmpty();
         sky = findViewById(R.id.sky);
         sky.setIntensity(cfg.skyIntensity);
         glass = findViewById(R.id.glass);
@@ -716,6 +735,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         addTopBarApps(cfg.topBarApps);
         iconOnlyButtons = cfg.iconOnlyButtons;
         topMenu = cfg.topMenu;
+        networkStatusNeeded = cfg.showNetworkPill || cfg.topMenu;
         wifiIconOnly = iconOnlyButtons && cfg.wifiLabelWidth <= 0;
         if (cfg.wifiStatusColor) {
             wifiPlainTint = btnWifi.getCompoundDrawableTintList();
@@ -817,13 +837,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
-        if (tim != null) tim.registerCallback(inputCallback, handler);
-        if (cm != null) {
+        if (tim != null && showInputsPill) {
+            tim.registerCallback(inputCallback, handler);
+            inputCallbackRegistered = true;
+        }
+        if (cm != null && networkStatusNeeded) {
             cm.registerDefaultNetworkCallback(networkCallback);
             cm.registerNetworkCallback(new NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_VPN)
                     .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
                     .build(), vpnCallback);
+            networkCallbacksRegistered = true;
         }
         // Not after recreate(): the launch intent survives it and would open the settings again.
         if (savedInstanceState == null && !openLauncherSettingsIfAsked(getIntent())) openInputsIfAsked(getIntent());
@@ -971,8 +995,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         if (showStats) startStats();
         sky.update();
-        wallpaperPlayer.start();
-        handler.postDelayed(minuteTick, MINUTE_MS);
+        if (wallpaperPlayer != null) wallpaperPlayer.start();
+        scheduleHomeRefresh();
         if (festive && diya != null) {
             diya.start();
             LocalDate today = LocalDate.now();
@@ -1086,23 +1110,28 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      * ones and cards stay off for this process.
      */
     private void reloadTiles() {
-        if (reordering) endReorder();   // an app installed or removed while reordering: keep the order so far
-        // Read these before reload(): rebinding can move focus to the first tile and overwrite them.
-        final String returnKey = lastFocusedKey;
-        final int returnSlot = lastFocused;
-        final List<Cards.Card> none = Collections.emptyList();
-        // An updated app may bring new artwork; the backdrop is cheap to make again.
-        heroArtCache.clear();
-        heroArtKey = null;
-        // One LEANBACK query for both the tiles and the card checks.
-        final List<ResolveInfo> leanback = getPackageManager().queryIntentActivities(
-                new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER), 0);
-        cards = moduleCards ? CardFeature.run(() -> Cards.discover(this, hiddenApps,
-                () -> Cards.load(Cards.storeFile(this)), leanback), none) : none;
-        adapter.reload(cards.isEmpty() ? none : CardFeature.run(() -> Cards.shown(cards), none), leanback);
-        lastFocusedKey = returnKey;
-        lastFocused = returnSlot;
-        packageSequence = currentPackageSequence(packageSequence);
+        android.os.Trace.beginSection("GuestTV.AppTiles");
+        try {
+            if (reordering) endReorder();   // an app installed or removed while reordering: keep the order so far
+            // Read these before reload(): rebinding can move focus to the first tile and overwrite them.
+            final String returnKey = lastFocusedKey;
+            final int returnSlot = lastFocused;
+            final List<Cards.Card> none = Collections.emptyList();
+            // An updated app may bring new artwork; the backdrop is cheap to make again.
+            heroArtCache.clear();
+            heroArtKey = null;
+            // One LEANBACK query for both the tiles and the card checks.
+            final List<ResolveInfo> leanback = getPackageManager().queryIntentActivities(
+                    new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER), 0);
+            cards = moduleCards ? CardFeature.run(() -> Cards.discover(this, hiddenApps,
+                    () -> Cards.load(Cards.storeFile(this)), leanback), none) : none;
+            adapter.reload(cards.isEmpty() ? none : CardFeature.run(() -> Cards.shown(cards), none), leanback);
+            lastFocusedKey = returnKey;
+            lastFocused = returnSlot;
+            packageSequence = currentPackageSequence(packageSequence);
+        } finally {
+            android.os.Trace.endSection();
+        }
     }
 
     /**
@@ -1140,7 +1169,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         super.onPause();
         root.removeCallbacks(showIdleClock);
         endReorder();   // Home or another app while reordering keeps the order so far
-        wallpaperPlayer.stop();
+        if (wallpaperPlayer != null) wallpaperPlayer.stop();
         stopAmbientAnimation();
         hero.animate().cancel();
         ambient.animate().cancel();
@@ -1161,6 +1190,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         started = false;
         unregisterReceiver(timeReceiver);
         handler.removeCallbacks(clockCheck);
+        handler.removeCallbacks(minuteTick);
         stopped = true;
         tileRefresh.onStop();
     }
@@ -1183,7 +1213,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         grid.getRecycledViewPool().clear();
         heroArtCache.clear();
         heroArtKey = null;
-        wallpaperPlayer.releaseForMemoryPressure();
+        if (wallpaperPlayer != null) wallpaperPlayer.releaseForMemoryPressure();
         tileRefresh.invalidate();
     }
 
@@ -1201,11 +1231,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(packageReceiver);
-        wallpaperPlayer.close();
+        if (wallpaperPlayer != null) wallpaperPlayer.close();
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
-        if (tim != null) tim.unregisterCallback(inputCallback);
-        if (cm != null) {
+        if (tim != null && inputCallbackRegistered) tim.unregisterCallback(inputCallback);
+        if (cm != null && networkCallbacksRegistered) {
             cm.unregisterNetworkCallback(networkCallback);
             cm.unregisterNetworkCallback(vpnCallback);
         }
@@ -2540,6 +2570,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** Shows the Wi-Fi network name on the button when we can read it, otherwise the connection type. */
     private void updateWifiLabel() {
+        if (!networkStatusNeeded) return;
         String text = getString(R.string.wifi);
         boolean vpn = false, online = false, validated = false;
         int icon = R.drawable.ic_wifi;

@@ -23,6 +23,12 @@ Il ritorno dalla vecchia home alla nuova tramite il pulsante Home fisico è stat
 
 La versione nel repository può essere successiva a quella installata sul televisore. Non vengono eseguite installazioni o modifiche da remoto durante la preparazione del repository.
 
+## Prestazioni — versione 3.2
+
+Il profilo Saba evita le letture Wi-Fi/VPN per l'indicatore nascosto, non inizializza il gestore degli sfondi inutilizzato e aggiorna il saluto alla prossima ora locale invece che ogni minuto. Le preferenze non sensibili del tema vengono scritte in modo asincrono. Aspetto, lingue, app e switch della home sono conservati.
+
+[docs/PERFORMANCE.md](docs/PERFORMANCE.md) descrive le modifiche e lo strumento ADB per leggere CPU/RAM/frame, disattivare le animazioni di sistema con backup e precompilare il solo launcher. Il miglioramento reale richiede ancora le misure sul TV: questi comandi non sono stati eseguiti sul dispositivo.
+
 ## Compilazione
 
 Servono JDK 17, Android SDK 34 e Python 3. Imposta `ANDROID_HOME` o `sdk.dir` nel file locale `local.properties`.

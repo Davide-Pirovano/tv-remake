@@ -26,12 +26,13 @@
 3. Premere Home fisico: deve comparire la nuova home. Ripetere da un'app aperta dalla vecchia home.
 4. Riavviare senza premere il telecomando: al completamento dell'avvio deve comparire la nuova home, anche se il firmware mostra inizialmente TV Live. Controllare che resti visibile.
 5. Riprovare Google Play, TV Live, Netflix, YouTube, Prime e Volume − tenuto premuto.
+6. Eseguire le misure prima/dopo descritte in [PERFORMANCE.md](PERFORMANCE.md), controllando saluto, orologio, ingressi e uso di CPU/RAM con la versione 3.2.
 
 Non usare Home iniettato via ADB per sostituire la prova fisica: non attraversa il filtro dei tasti.
 
 ## Verifica locale
 
-Ultima verifica locale: 25 ottobre 2026. Build release riuscita, 230 test JVM e 2 test Python passati, zero errori lint (restano avvisi). Sintassi dello script Bash verificata.
+Ultima verifica locale: 25 ottobre 2026. Versione 3.2 compilata: 234 test JVM e 10 test Python passati, zero errori lint (restano avvisi), sintassi dello script Bash verificata. I nuovi test coprono pianificazione del saluto, fusi e ora legale, backup prima delle modifiche, ripristino in caso di errore, vincolo sul dispositivo/SDK e rifiuto di backup manomessi. Tutte le misure di velocità del dispositivo restano da raccogliere sul TV.
 
 Comandi riproducibili:
 

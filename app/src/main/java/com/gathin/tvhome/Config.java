@@ -650,11 +650,12 @@ final class Config {
             if (!"absent".equals(token)) editor.remove("columns").remove("animations")
                     .remove("advanced_effects").remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY)
                     .remove(DOCK_OPACITY_KEY);
-            editor.putString(THEME_SIGNATURE_KEY, signature).commit();
+            // These choices are read in this process immediately; don't block the first frame on a disk flush.
+            editor.putString(THEME_SIGNATURE_KEY, signature).apply();
         } else if (!seen.equals(signature)) {
             choices.edit().remove("columns").remove("animations").remove("advanced_effects")
                     .remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY).remove(DOCK_OPACITY_KEY)
-                    .putString(THEME_SIGNATURE_KEY, signature).commit();
+                    .putString(THEME_SIGNATURE_KEY, signature).apply();
         }
     }
 
