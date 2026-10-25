@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources><string name="guest_owner">Eigentümer</string><string-array name="app_labels"><item>com.mediatek.wwtv.tvcenter=TV · Fernsehsender</item></string-array><string name="guest_language">Sprache</string><string name="guest_other_languages">Weitere Sprachen</string><string name="guest_language_hint">Verfügbare Sprachen auf diesem Fernseher</string><string name="guest_back">Zurück</string></resources>

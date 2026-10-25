@@ -1,0 +1,14 @@
+.gradle/
+**/build/
+local.properties
+.DS_Store
+*.apk
+*.aab
+*.zip
+*.keystore
+*.jks
+*.log
+__pycache__/
+app/src/main/assets/owner.json
+backup/
+outputs/

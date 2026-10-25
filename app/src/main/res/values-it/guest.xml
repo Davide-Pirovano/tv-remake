@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources><string name="guest_owner">Proprietario</string><string-array name="app_labels"><item>com.mediatek.wwtv.tvcenter=TV · Canali antenna</item></string-array><string name="guest_language">Lingua</string><string name="guest_other_languages">Altre lingue</string><string name="guest_language_hint">Lingue disponibili su questo TV</string><string name="guest_back">Indietro</string></resources>

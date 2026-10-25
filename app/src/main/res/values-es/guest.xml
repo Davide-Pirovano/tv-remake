@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources><string name="guest_owner">Propietario</string><string-array name="app_labels"><item>com.mediatek.wwtv.tvcenter=TV · Canales en directo</item></string-array><string name="guest_language">Idioma</string><string name="guest_other_languages">Otros idiomas</string><string name="guest_language_hint">Idiomas disponibles en este televisor</string><string name="guest_back">Volver</string></resources>

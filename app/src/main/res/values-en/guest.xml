@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources><string name="guest_owner">Owner</string><string-array name="app_labels"><item>com.mediatek.wwtv.tvcenter=TV · Live channels</item></string-array><string name="guest_language">Language</string><string name="guest_other_languages">Other languages</string><string name="guest_language_hint">Languages available on this TV</string><string name="guest_back">Back</string></resources>

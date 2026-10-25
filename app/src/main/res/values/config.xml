@@ -1,0 +1,231 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+
+
+    <string-array name="settings_fallback_components" translatable="false">
+        <item>com.xiaomi.mitv.settings/com.xiaomi.mitv.settings.entry.MainActivity</item>
+        <item>com.tcl.settings/com.tcl.settings.ui.MainActivity</item>
+        <item>com.amazon.tv.launcher/com.amazon.tv.launcher.ui.MainSettingsActivity</item>
+    </string-array>
+
+
+    <string-array name="dock_apps">
+        <item>com.mediatek.wwtv.tvcenter</item><item>com.google.android.youtube.tv</item><item>com.netflix.ninja</item><item>com.amazon.amazonvideo.livingroom</item><item>com.spotify.tv.android</item></string-array>
+
+    <bool name="fill_dock">true</bool>
+
+
+    <string-array name="hidden_apps">
+        <item>com.android.cts.priv.ctsshim</item><item>com.google.android.ext.services</item><item>com.google.android.apps.mediashell</item><item>com.google.android.katniss</item><item>com.android.dynsystem</item><item>com.android.providers.calendar</item><item>com.android.tv.settings</item><item>com.android.providers.media</item><item>com.google.android.onetimeinitializer</item><item>com.google.android.ext.shared</item><item>com.homwee.alexacontrol</item><item>com.android.externalstorage</item><item>com.android.htmlviewer</item><item>com.android.companiondevicemanager</item><item>com.android.providers.downloads</item><item>com.android.providers.tv</item><item>com.android.bluetooth.auto_generated_rro_product__</item><item>com.android.networkstack.inprocess</item><item>com.google.android.backdrop</item><item>com.mediatek.tvinput</item><item>com.homwee.aipont</item><item>com.mediatek.wwtv.setupwizard</item><item>com.google.android.tungsten.setupwraith</item><item>com.changhong.inface.net.wfd</item><item>com.google.android.overlay.modules.permissioncontroller</item><item>com.android.vending</item><item>com.android.pacprocessor</item><item>com.homwee.mmp.imageplayer</item><item>com.mediatek.tv.service</item><item>com.android.certinstaller</item><item>com.google.android.marvin.talkback</item><item>com.android.networkstack.tethering.inprocess.rro</item><item>android</item><item>com.android.backupconfirm</item><item>com.homwee.multiscreenshare</item><item>com.android.statementservice</item><item>com.android.settings.intelligence</item><item>com.google.android.permissioncontroller</item><item>com.android.providers.settings</item><item>com.android.wifi.resources.rro</item><item>com.dolby.android.audio.service</item><item>com.android.sharedstoragebackup</item><item>com.android.printspooler</item><item>com.android.dreams.basic</item><item>com.android.providers.settings.auto_generated_rro_product__</item><item>com.google.android.overlay.modules.ext.services</item><item>com.mediatek.autopair</item><item>com.android.se</item><item>com.mstar.android.tv.disclaimercustomization</item><item>com.android.inputdevices</item><item>com.mediatek.overlay.tvcenter</item><item>com.homwee.synckey</item><item>com.android.tv.overlay.lowram</item><item>com.google.android.tvrecommendations</item><item>android.autoinstalls.config.homwee</item><item>com.homwee.help</item><item>com.google.android.modulemetadata</item><item>com.android.bluetooth.auto_generated_rro_vendor__</item><item>com.mediatek.overlay.tvsettings</item><item>com.homwee.store</item><item>com.android.providers.settings.auto_generated_rro_vendor__</item><item>com.google.android.tvlauncher</item><item>com.google.android.webview</item><item>com.android.keychain</item><item>com.google.android.youtube.tvmusic</item><item>com.homwee.mmp.screenshare</item><item>com.google.android.packageinstaller</item><item>com.google.android.gms</item><item>com.google.android.gsf</item><item>com.google.android.tts</item><item>com.android.wifi.resources</item><item>com.homwee.chinstallapk</item><item>com.google.android.partnersetup</item><item>com.android.localtransport</item><item>com.google.android.videos</item><item>com.android.proxyhandler</item><item>com.mediatek.wwtv.webview</item><item>com.google.android.overlay.modules.permissioncontroller.forframework</item><item>com.android.providers.contacts.auto_generated_rro_product__</item><item>com.google.android.feedback</item><item>com.homwee.factory</item><item>com.google.android.syncadapters.calendar</item><item>com.android.soundpicker</item><item>com.mediatek.android.boot.appsplashscreen</item><item>com.homwee.dmt.upgrade</item><item>com.android.networkstack.tethering.inprocess</item><item>com.android.networkstack.permissionconfig</item><item>com.android.networkstack.tethering.rro</item><item>com.google.android.sss.authbridge</item><item>com.google.android.leanbacklauncher.partnercustomizer</item><item>com.android.cts.ctsshim</item><item>com.google.android.overlay.modules.modulemetadata.forframework</item><item>com.mediatek.network</item><item>com.homwee.upgrade</item><item>com.android.vpndialogs</item><item>com.google.android.tv.frameworkpackagestubs</item><item>com.android.shell</item><item>com.android.wallpaperbackup</item><item>com.homwee.overlay.tvservice</item><item>com.homwee.dynamicbacklight</item><item>com.android.providers.userdictionary</item><item>com.android.providers.media.module</item><item>com.android.hotspot2.osulogin</item><item>com.homwee.chtvmanager</item><item>com.google.android.tv.remote.service</item><item>com.android.location.fused</item><item>com.android.systemui</item><item>android.auto_generated_rro_product__</item><item>com.google.android.play.games</item><item>com.homwee.mmp.fileexplorer</item><item>com.android.bluetooth</item><item>com.android.providers.contacts</item><item>com.android.captiveportallogin</item><item>com.google.android.inputmethod.latin</item><item>android.auto_generated_rro_vendor__</item></string-array>
+
+
+    <string name="live_tv_package" translatable="false">com.mediatek.wwtv.tvcenter</string>
+
+
+    <bool name="boot_to_live_tv">false</bool>
+
+
+    <bool name="open_on_start_choice">false</bool>
+
+
+    <string name="live_tv_action" translatable="false" />
+
+
+    <string name="live_tv_input_id" translatable="false" />
+
+
+    <string-array name="launch_actions">
+    </string-array>
+
+
+    <string-array name="app_labels">
+    <item>com.mediatek.wwtv.tvcenter=TV · Live channels</item></string-array>
+
+    <string-array name="app_banners">
+    <item>com.mediatek.wwtv.tvcenter=banner_tv</item></string-array>
+
+
+    <string name="source_panel_service" translatable="false" />
+    <string name="source_panel_action" translatable="false" />
+
+    <string name="source_panel_extra" translatable="false" />
+
+
+    <bool name="coocaa_sources">false</bool>
+
+
+    <string name="input_action" translatable="false" />
+
+    <string name="input_uri_scheme" translatable="false" />
+
+
+    <bool name="key_filter">true</bool>
+
+
+    <bool name="gamepad_passthrough">false</bool>
+
+
+    <bool name="consume_volume_keys">false</bool>
+
+
+    <string-array name="input_sources" translatable="false">
+    </string-array>
+
+
+    <integer-array name="settings_key_scancodes">
+    </integer-array>
+
+    <integer-array name="settings_key_keycodes">
+    </integer-array>
+
+    <bool name="settings_key_panel">false</bool>
+
+
+    <bool name="restore_key_services">false</bool>
+
+
+    <integer-array name="input_key_keycodes">
+    </integer-array>
+
+    <bool name="handle_view_inputs">false</bool>
+
+    <string-array name="app_keys" translatable="false">
+    </string-array>
+
+
+    <string name="stock_home_redirect" translatable="false" />
+
+
+    <bool name="shamsi_date">false</bool>
+
+    <bool name="lunar_date">false</bool>
+
+
+    <string name="greeting_name" translatable="false" />
+
+    <bool name="show_greeting">true</bool>
+
+    <bool name="header_white">false</bool>
+
+    <string name="vpn_app" translatable="false" />
+
+    <bool name="dock_row">true</bool>
+
+    <bool name="top_menu">false</bool>
+
+    <bool name="launcher_settings_button">false</bool>
+
+    <bool name="dock_glass">false</bool>
+
+    <bool name="single_row">true</bool>
+
+    <bool name="dock_band_all">false</bool>
+
+    <bool name="dock_even_padding">false</bool>
+
+    <bool name="reorder_button">false</bool>
+
+    <bool name="icon_only_buttons">false</bool>
+
+    <bool name="icon_only_inputs">false</bool>
+
+    <bool name="wifi_status_color">false</bool>
+
+    <bool name="wifi_status_warnings">false</bool>
+
+    <bool name="library_button">false</bool>
+
+    <integer name="wifi_label_width">0</integer>
+
+
+    <bool name="show_network_pill">false</bool>
+
+    <string-array name="top_bar_apps" translatable="false">
+    </string-array>
+
+    <bool name="show_inputs_pill">true</bool>
+
+    <bool name="always_show_names">true</bool>
+
+    <bool name="wallpaper_true_color">false</bool>
+
+    <bool name="wallpaper_captions">false</bool>
+
+    <string name="wallpaper_moods" translatable="false" />
+
+    <bool name="tile_menu">false</bool>
+
+
+    <integer name="rows_below_dock">0</integer>
+
+
+    <bool name="dock_title">true</bool>
+
+
+    <integer name="columns">5</integer>
+
+
+    <bool name="animations">false</bool>
+    <bool name="advanced_effects">false</bool>
+
+
+    <bool name="show_home_settings_shortcut">false</bool>
+
+
+    <bool name="app_library">false</bool>
+
+    <bool name="uniform_tiles">false</bool>
+
+    <bool name="app_library_selection">false</bool>
+
+
+    <string-array name="library_apps" translatable="false">
+    </string-array>
+
+
+    <bool name="module_cards">false</bool>
+
+
+    <bool name="reduced_motion">true</bool>
+
+
+    <bool name="focus_overshoot">true</bool>
+
+
+    <bool name="show_stats">false</bool>
+
+
+    <integer name="sky_intensity">0</integer>
+
+    <string name="latitude" translatable="false" />
+    <string name="longitude" translatable="false" />
+
+
+    <bool name="cinematic_home">false</bool>
+
+    <bool name="cinematic_dots">true</bool>
+
+    <bool name="cinematic_white_focus">false</bool>
+
+    <integer name="cinematic_scrim">100</integer>
+    <integer name="cinematic_art">50</integer>
+
+
+    <bool name="ambient_glow">false</bool>
+
+    <bool name="app_glow">false</bool>
+
+    <bool name="fade_rows">false</bool>
+
+    <integer name="home_idle_clock_minutes">0</integer>
+
+    <bool name="clock_wallpaper">false</bool>
+
+    <integer name="clock_wallpaper_dim">50</integer>
+
+    <bool name="clock_glow">false</bool>
+
+    <string name="glow_style" translatable="false">radial</string>
+
+    <string name="glass_style" translatable="false">rim</string>
+</resources>

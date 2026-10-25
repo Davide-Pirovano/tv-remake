@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources><string name="guest_owner">Owner</string><string name="guest_language">Language</string><string name="guest_other_languages">Other languages</string><string name="guest_language_hint">Languages available on this TV</string><string name="guest_back">Back</string><string name="guest_play_key_name">Telecomando · Home e Google Play</string>
+<string name="guest_play_key_description">Home apre la home ospiti; il tasto Google Play del telecomando resta bloccato. Non legge il contenuto dello schermo.</string>
+</resources>
