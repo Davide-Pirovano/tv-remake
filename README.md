@@ -29,6 +29,10 @@ Il profilo Saba evita le letture Wi-Fi/VPN per l'indicatore nascosto, non inizia
 
 [docs/PERFORMANCE.md](docs/PERFORMANCE.md) descrive le modifiche e lo strumento ADB per leggere CPU/RAM/frame, disattivare le animazioni di sistema con backup e precompilare il solo launcher. Il miglioramento reale richiede ancora le misure sul TV: questi comandi non sono stati eseguiti sul dispositivo.
 
+## App inutilizzate e memoria
+
+Il profilo [docs/PULIZIA-TV.md](docs/PULIZIA-TV.md) prepara la disattivazione reversibile di 10 app accessorie, mantenendo Play Store, mirroring, app ospiti e componenti del televisore. `tools/tv_cleanup.py` offre lettura del piano, applicazione con backup e ripristino. Non è stato eseguito sul TV. La disattivazione non cancella gli APK e non garantisce spazio libero aggiuntivo; RAM e CPU vanno misurate sul posto.
+
 ## Compilazione
 
 Servono JDK 17, Android SDK 34 e Python 3. Imposta `ANDROID_HOME` o `sdk.dir` nel file locale `local.properties`.

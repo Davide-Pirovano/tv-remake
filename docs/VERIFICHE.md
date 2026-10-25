@@ -42,7 +42,7 @@ Aggiunta la procedura persistente per quattro app e account Google, con conferme
 
 ## Verifica locale
 
-Ultima verifica locale: 25 ottobre 2026. Versione 3.4 compilata: 237 test JVM e 10 test Python passati, zero errori lint (restano avvisi), sintassi dello script Bash verificata. I test coprono anche il rifiuto di esiti parziali/falliti, la conferma manuale obbligatoria per Google e il vincolo sulle sole quattro app streaming. I test delle prestazioni coprono pianificazione del saluto, fusi e ora legale, backup prima delle modifiche, ripristino in caso di errore, vincolo sul dispositivo/SDK e rifiuto di backup manomessi. Tutte le misure di velocità del dispositivo restano da raccogliere sul TV.
+Ultima verifica locale: 25 ottobre 2026. Versione 3.4 compilata: 237 test JVM e 18 test Python passati, zero errori lint (restano avvisi), sintassi dello script Bash verificata. I test coprono anche il rifiuto di esiti parziali/falliti, la conferma manuale obbligatoria per Google e il vincolo sulle sole quattro app streaming. I test delle prestazioni coprono pianificazione del saluto, fusi e ora legale, backup prima delle modifiche, ripristino in caso di errore, vincolo sul dispositivo/SDK e rifiuto di backup manomessi. Tutte le misure di velocità del dispositivo restano da raccogliere sul TV.
 
 Comandi riproducibili:
 
@@ -53,3 +53,7 @@ bash -n tools/install.sh
 ```
 
 Non sono inclusi nel repository PIN, backup del dispositivo, file di firma o APK personali.
+
+## Profilo pulizia app accessorie
+
+Preparato `tools/tv_cleanup.py`, ancora non applicato al TV. Otto test Python aggiuntivi coprono backup prima delle modifiche, cinque stati di abilitazione Android, ripristino in caso di errore, lettura senza scritture, rifiuto di firmware/collegamento errati e backup con package estranei. Play Store, mirroring, app ospiti, vecchia home e componenti critici sono fuori dalla lista di modifica. Prove sul dispositivo in [PULIZIA-TV.md](PULIZIA-TV.md).
