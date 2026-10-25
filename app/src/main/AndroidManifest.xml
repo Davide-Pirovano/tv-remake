@@ -27,6 +27,10 @@
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" tools:ignore="ProtectedPermissions" />
     <queries>
         <package android:name="com.google.android.tvlauncher"/>
+        <package android:name="com.amazon.amazonvideo.livingroom"/>
+        <package android:name="com.spotify.tv.android"/>
+        <package android:name="com.netflix.ninja"/>
+        <package android:name="com.google.android.youtube.tv"/>
         <!-- The standard settings handlers, so package visibility doesn't hide them and send the pills to a vendor fallback by mistake. -->
         <intent>
             <action android:name="android.settings.SETTINGS" />
@@ -80,6 +84,11 @@
         android:allowBackup="false"
         android:localeConfig="@xml/locales_config">
 
+        <receiver android:name=".GuestDeviceAdminReceiver" android:exported="true"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data android:name="android.app.device_admin" android:resource="@xml/guest_device_admin"/>
+            <intent-filter><action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/></intent-filter>
+        </receiver>
         <receiver android:name=".GuestBootReceiver" android:exported="false">
             <intent-filter android:priority="999"><action android:name="android.intent.action.BOOT_COMPLETED"/></intent-filter>
         </receiver>

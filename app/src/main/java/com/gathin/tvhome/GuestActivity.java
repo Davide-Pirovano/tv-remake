@@ -35,6 +35,7 @@ import javax.crypto.spec.PBEKeySpec;
 public final class GuestActivity extends Activity {
     private LinearLayout panel;
     private boolean authenticated;
+    private static int resetJobs; // Main-thread callbacks only; no background polling.
     private PinPad activePinPad;
     static SharedPreferences prefs(Context c) { return c.getSharedPreferences("stay", MODE_PRIVATE); }
     static Context localized(Context base) {
@@ -49,7 +50,7 @@ public final class GuestActivity extends Activity {
         activity.startActivity(new Intent(activity, GuestActivity.class).putExtra("settings", true));
     }
     static void onHome(Activity activity) {
-        if (!prefs(activity).getBoolean("ready", false))
+        if (prefs(activity).getBoolean("reset_pending", false) || !prefs(activity).getBoolean("ready", false))
             activity.startActivity(new Intent(activity, GuestActivity.class));
     }
     @Override protected void attachBaseContext(Context base) { super.attachBaseContext(localized(base)); }
@@ -65,6 +66,7 @@ public final class GuestActivity extends Activity {
             }
         } catch (Exception e) { page("Configurazione non disponibile", "Contattare il proprietario."); return; }
         if (getIntent().getBooleanExtra("owner", false)) login();
+        else if (prefs(this).getBoolean("reset_pending", false)) resetLocked();
         else if (getIntent().getBooleanExtra("settings", false)) guestSettings();
         else if (prefs(this).getBoolean("welcome_seen", false)) languages();
         else welcome();
@@ -155,6 +157,7 @@ public final class GuestActivity extends Activity {
         button(getString(R.string.guest_back),this::languages);list.requestFocus();
     }
     private void selectLanguage(String code) {
+        if(prefs(this).getBoolean("reset_pending",false)) { resetLocked(); return; }
         prefs(this).edit().putString("language",code).putBoolean("ready",true).commit();
         boolean systemChanged=systemLanguage(code);
         if (!systemChanged) {
@@ -228,6 +231,7 @@ public final class GuestActivity extends Activity {
     }
     private void ownerMenu() {
         if(!authenticated) { login(); return; }
+        if(prefs(this).getBoolean("reset_pending",false)) { resetProgress(); return; }
         page("Gestione soggiorno", "Le modifiche vengono applicate solo dopo la conferma.");
         button("Prepara per nuovi ospiti", this::prepare).requestFocus();
         button("Ripristina lingua italiana",()->new AlertDialog.Builder(this).setTitle("Ripristinare l’italiano?")
@@ -240,16 +244,115 @@ public final class GuestActivity extends Activity {
     }
     private void prepare() {
         if(!authenticated) { login(); return; }
-        page("Nuovo soggiorno", "Nome ospiti facoltativo: apparirà solo nel benvenuto.\nQuesta funzione non disconnette gli account delle app.");
+        page("Nuovo soggiorno", "Nome ospiti facoltativo. Il reset comprende Prime Video, Spotify, Netflix, YouTube e gli account Google sul TV.");
         EditText name=field("Es. Marco e Giulia",false);
-        button("Conferma nuovo soggiorno",()->new AlertDialog.Builder(this).setTitle("Preparare il nuovo soggiorno?")
-                .setMessage("Sostituisce il nome precedente, ripristina l’italiano e riattiva benvenuto e scelta lingua.")
-                .setNegativeButton("Annulla",null).setPositiveButton("Conferma",(d,w)->{
-                    prefs(this).edit().putString("guest",name.getText().toString().trim())
-                            .putString("language","it").putBoolean("ready",false).putBoolean("welcome_seen",false).commit();
-                    systemLanguage("it"); home();
+        button("Prepara e pulisci account",()->new AlertDialog.Builder(this).setTitle("Preparare il nuovo soggiorno?")
+                .setMessage("Cancella accessi e preferenze locali delle quattro app e richiede la rimozione di tutti gli account Google dal TV. Servirà un nuovo accesso. Il reset non è annullabile; PIN, Wi-Fi e canali restano conservati.")
+                .setNegativeButton("Annulla",null).setPositiveButton("Inizia",(d,w)->{
+                    SharedPreferences.Editor edit=prefs(this).edit().putBoolean("reset_pending",true)
+                            .putString("reset_guest",name.getText().toString().trim())
+                            .putString("reset_session",java.util.UUID.randomUUID().toString());
+                    for(int i=0;i<StayReset.STEPS;i++)edit.remove("reset_step_"+i);
+                    if(edit.commit())resetProgress(); else toast("Impossibile salvare. Reset non iniziato.");
                 }).show());
         button("Annulla",this::ownerMenu); name.requestFocus();
+    }
+    private void resetLocked() {
+        page("Preparazione da completare", "Il proprietario deve completare la pulizia degli account prima del nuovo soggiorno.");
+        button("Area proprietario",()->{getIntent().putExtra("owner",true);login();}).requestFocus();
+    }
+    private String[] resetResults() {
+        String[] results=new String[StayReset.STEPS];
+        for(int i=0;i<results.length;i++)results[i]=prefs(this).getString("reset_step_"+i,"");
+        return results;
+    }
+    private boolean managedResetAvailable() {
+        android.app.admin.DevicePolicyManager manager=getSystemService(android.app.admin.DevicePolicyManager.class);
+        return android.os.Build.VERSION.SDK_INT>=28 && manager!=null && manager.isDeviceOwnerApp(getPackageName());
+    }
+    private void resetProgress() {
+        if(!authenticated) {login();return;}
+        page("Pulizia per nuovi ospiti", "Apri ogni passaggio e conferma la pulizia. Il progresso rimane salvato anche uscendo o riavviando.\nI profili e le lingue salvati online non vengono modificati.");
+        if(managedResetAvailable())button("Azzera automaticamente le quattro app",this::clearStreamingApps).setEnabled(resetJobs==0);
+        if(resetJobs>0)button("Aggiorna esiti — pulizia in corso",this::resetProgress);
+        String[] results=resetResults();
+        for(int i=0;i<StayReset.STEPS;i++) {
+            final int step=i;
+            String status=results[i].isEmpty()?"Da completare":"OK · "+results[i];
+            Button next=button(StayReset.LABELS[i]+" · "+status,()->resetStep(step));
+            if(i==0)next.requestFocus();
+        }
+        Button finish=button("Completa e ripristina italiano",this::finishReset);
+        finish.setEnabled(resetJobs==0 && StayReset.complete(results));
+        button("Esci — riprenderai dopo il PIN",this::finish);
+    }
+    private void resetStep(int step) {
+        if(!authenticated) {login();return;}
+        if(resetJobs>0) {toast("Attendi la pulizia automatica, poi aggiorna gli esiti.");return;}
+        boolean accounts=step==4;
+        page(StayReset.LABELS[step],accounts
+                ?"Nelle impostazioni del TV rimuovi TUTTI gli account Google. Uscire soltanto da YouTube non basta. Se non ci sono account, conferma dopo aver controllato."
+                :"Apri le informazioni dell’app, poi Memoria → Cancella dati / Cancella tutti i dati. Svuotare soltanto la cache o uscire dall’account non basta. Se l’app non è installata, verifica prima di confermare.");
+        button("Apri impostazioni Android",()->{
+            Intent intent=accounts?new Intent(Settings.ACTION_SYNC_SETTINGS)
+                    :new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,android.net.Uri.parse("package:"+StayReset.PACKAGES[step]));
+            try {startActivity(intent);}
+            catch(android.content.ActivityNotFoundException|SecurityException e) {
+                try {startActivity(new Intent(Settings.ACTION_SETTINGS));}
+                catch(android.content.ActivityNotFoundException|SecurityException ignored){toast("Impostazioni non disponibili: aprirle dal telecomando.");}
+            }
+        }).requestFocus();
+        button(accounts?"Conferma account Google rimossi":"Conferma dati cancellati / app assente",()->
+                new AlertDialog.Builder(this).setTitle("Conferma controllo manuale")
+                    .setMessage("La home non può verificare questo passaggio nelle impostazioni. Conferma soltanto dopo averlo completato e controllato. Tornando dalle impostazioni sarà richiesto nuovamente il PIN.")
+                    .setNegativeButton("Annulla",null).setPositiveButton("Ho controllato",(d,w)->{
+                        if(prefs(this).edit().putString("reset_step_"+step,"manuale").commit())resetProgress();
+                        else toast("Conferma non salvata. Riprova.");
+                    }).show());
+        button("Indietro",this::resetProgress);
+    }
+    private void clearStreamingApps() {
+        if(android.os.Build.VERSION.SDK_INT<28 || !authenticated || resetJobs>0 || !managedResetAvailable())return;
+        String session=prefs(this).getString("reset_session","");
+        page("Azzeramento app", "Attendi gli esiti di Android. Gli account Google vanno comunque controllati nelle impostazioni.");
+        android.app.admin.DevicePolicyManager manager=getSystemService(android.app.admin.DevicePolicyManager.class);
+        android.content.ComponentName admin=new android.content.ComponentName(this,GuestDeviceAdminReceiver.class);
+        for(int i=0;i<StayReset.PACKAGES.length;i++) {
+            final int step=i;
+            TextView status=new TextView(this);status.setTextColor(Color.WHITE);
+            status.setText(StayReset.LABELS[i]+" · In corso");panel.addView(status);
+            // Invalidate earlier confirmations before issuing another destructive operation.
+            if(!prefs(this).edit().remove("reset_step_"+step).commit()) {
+                status.setText(StayReset.LABELS[i]+" · Errore di salvataggio");continue;
+            }
+            try {
+                resetJobs++;
+                manager.clearApplicationUserData(admin,StayReset.PACKAGES[i],getMainExecutor(),(pkg,success)->{
+                    resetJobs--;
+                    if(!prefs(this).getBoolean("reset_pending",false)
+                            || !session.equals(prefs(this).getString("reset_session","")))return;
+                    boolean saved=success && prefs(this).edit().putString("reset_step_"+step,"automatico").commit();
+                    status.setText(StayReset.LABELS[step]+(saved?" · Dati cancellati":" · Non completato: riprova o usa le impostazioni"));
+                });
+            }catch(RuntimeException e){resetJobs--;status.setText(StayReset.LABELS[i]+" · Non consentito: usa le impostazioni");}
+        }
+        button("Torna ai passaggi",this::resetProgress);
+    }
+    private void finishReset() {
+        if(!authenticated || resetJobs>0 || !prefs(this).getBoolean("reset_pending",false)
+                || !StayReset.complete(resetResults()))return;
+        // Restore language before making the new stay available; never claim a failed locale reset.
+        if(!systemLanguage("it") && !"it".equals(android.content.res.Resources.getSystem().getConfiguration().getLocales().get(0).getLanguage())) {
+            toast("Ripristina l’italiano nelle impostazioni del TV e riprova.");
+            try {startActivity(new Intent(Settings.ACTION_LOCALE_SETTINGS));}
+            catch(android.content.ActivityNotFoundException|SecurityException ignored){}
+            return;
+        }
+        SharedPreferences.Editor edit=prefs(this).edit().putString("guest",prefs(this).getString("reset_guest",""))
+                .putString("language","it").putBoolean("ready",false).putBoolean("welcome_seen",false)
+                .remove("reset_pending").remove("reset_guest").remove("reset_session");
+        for(int i=0;i<StayReset.STEPS;i++)edit.remove("reset_step_"+i);
+        if(edit.commit())home();else toast("Preparazione non salvata. Riprova.");
     }
     private void normalTv() {
         if(!authenticated){login();return;}
@@ -309,6 +412,7 @@ public final class GuestActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(getIntent().getBooleanExtra("owner",false))finish();
+        else if(prefs(this).getBoolean("reset_pending",false))resetLocked();
         else if(prefs(this).getBoolean("ready",false))home();
         else if(prefs(this).getBoolean("welcome_seen",false))languages();
         else welcome();

@@ -30,9 +30,13 @@
 
 Non usare Home iniettato via ADB per sostituire la prova fisica: non attraversa il filtro dei tasti.
 
+## Reset ospiti — versione 3.3
+
+Aggiunta la procedura persistente per quattro app e account Google, con conferme manuali esplicite, blocco del completamento parziale e backend nativo per cancellare dati delle app solo quando il launcher è device owner. Sul Saba attuale non è attivato il ruolo: usare la procedura dalle impostazioni. Nessun account o dato del TV è stato modificato durante lo sviluppo. Vedere [RESET-OSPITI.md](RESET-OSPITI.md) per i passaggi e le prove sul dispositivo.
+
 ## Verifica locale
 
-Ultima verifica locale: 25 ottobre 2026. Versione 3.2 compilata: 234 test JVM e 10 test Python passati, zero errori lint (restano avvisi), sintassi dello script Bash verificata. I nuovi test coprono pianificazione del saluto, fusi e ora legale, backup prima delle modifiche, ripristino in caso di errore, vincolo sul dispositivo/SDK e rifiuto di backup manomessi. Tutte le misure di velocità del dispositivo restano da raccogliere sul TV.
+Ultima verifica locale: 25 ottobre 2026. Versione 3.3 compilata: 237 test JVM e 10 test Python passati, zero errori lint (restano avvisi), sintassi dello script Bash verificata. I test coprono anche il rifiuto di esiti parziali/falliti, la conferma manuale obbligatoria per Google e il vincolo sulle sole quattro app streaming. I test delle prestazioni coprono pianificazione del saluto, fusi e ora legale, backup prima delle modifiche, ripristino in caso di errore, vincolo sul dispositivo/SDK e rifiuto di backup manomessi. Tutte le misure di velocità del dispositivo restano da raccogliere sul TV.
 
 Comandi riproducibili:
 

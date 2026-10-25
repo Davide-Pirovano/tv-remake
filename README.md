@@ -15,7 +15,7 @@ La home ospiti mostra TV antenna, YouTube, Netflix, Prime Video e Spotify. L'are
 - Sfondo petrolio, elementi vettoriali statici e fila app stabilizzata nella parte bassa. Nessuna animazione aggiunta o immagine remota.
 - Home diretto alla nuova interfaccia e blocco del solo tasto IR Google Play di questo modello. TV Live, Netflix, YouTube, Prime e volume vengono passati al sistema.
 
-Preparare un soggiorno **non disconnette gli account delle app streaming**.
+La versione 3.3 include la pulizia di **tutte e quattro le app** e il controllo della rimozione di **tutti gli account Google dal TV**. Il nuovo soggiorno viene attivato solo dopo aver completato i cinque passaggi. Sul TV attuale la pulizia richiede le impostazioni Android: non è ancora configurato come dispositivo amministrato. Dettagli, limiti e percorso automatico opzionale in [docs/RESET-OSPITI.md](docs/RESET-OSPITI.md).
 
 ## Stato delle verifiche
 
