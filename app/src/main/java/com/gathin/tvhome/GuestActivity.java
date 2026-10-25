@@ -37,6 +37,7 @@ public final class GuestActivity extends Activity {
     private boolean authenticated;
     private static int resetJobs; // Main-thread callbacks only; no background polling.
     private PinPad activePinPad;
+    private GuestWelcomeView welcomeView;
     static SharedPreferences prefs(Context c) { return c.getSharedPreferences("stay", MODE_PRIVATE); }
     static Context localized(Context base) {
         Configuration config = new Configuration(base.getResources().getConfiguration());
@@ -73,6 +74,7 @@ public final class GuestActivity extends Activity {
     }
     private int dp(int n) { return Math.round(n * getResources().getDisplayMetrics().density); }
     private void page(String title, String subtitle) {
+        if(welcomeView!=null) {welcomeView.stop();welcomeView=null;}
         activePinPad = null;
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
@@ -111,14 +113,14 @@ public final class GuestActivity extends Activity {
         }
     }
     private void welcome() {
-        String name = prefs(this).getString("guest", "");
-        page("Benvenuti · Welcome" + (name.isEmpty() ? "" : "\n"+name),
-                "Scegliete la vostra lingua per iniziare.\nChoose your language to get started.");
-        Button start=button("Inizia · Start", () -> {
-            prefs(this).edit().putBoolean("welcome_seen", true).commit();
-            languages();
+        if(welcomeView!=null)welcomeView.stop();
+        activePinPad=null;
+        welcomeView=new GuestWelcomeView(this,prefs(this).getString("guest", ""),()->{
+            if(prefs(this).edit().putBoolean("welcome_seen",true).commit())languages();
+            else {toast("Impossibile salvare. Riprova.");welcome();}
         });
-        GuestStyle.button(start,true);start.requestFocus();
+        setContentView(welcomeView);
+        welcomeView.requestFocus();
     }
     private void languages() {
         page("Lingua · Language", "Italiano / English / Français / Deutsch / Español");
@@ -402,7 +404,12 @@ public final class GuestActivity extends Activity {
     static String hex(byte[] data) {StringBuilder b=new StringBuilder();for(byte n:data)b.append(String.format(Locale.ROOT,"%02x",n&255));return b.toString();}
     static byte[] unhex(String text) {byte[] b=new byte[text.length()/2];for(int i=0;i<b.length;i++)b[i]=(byte)Integer.parseInt(text.substring(i*2,i*2+2),16);return b;}
     private void toast(String text) {Toast.makeText(this,text,Toast.LENGTH_LONG).show();}
+    @Override protected void onStart() {
+        super.onStart();
+        if(welcomeView!=null)welcomeView.start();
+    }
     @Override protected void onStop() {
+        if(welcomeView!=null)welcomeView.stop();
         super.onStop();
         // Owner access ends when leaving this activity, including opening the TV settings.
         if (authenticated && getIntent().getBooleanExtra("owner", false)) {

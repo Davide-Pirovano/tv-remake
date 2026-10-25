@@ -6,13 +6,13 @@ La home ospiti mostra TV antenna, YouTube, Netflix, Prime Video e Spotify. L'are
 
 ## Funzioni
 
-- Benvenuto una volta per soggiorno, con nome ospiti facoltativo.
+- Benvenuto a tutto schermo una volta per soggiorno: «Buongiorno» in 11 lingue con scorrimento verticale e dissolvenza, nome ospiti facoltativo. Premi OK sul telecomando o fai clic per scegliere la lingua.
 - Cinque lingue principali e una lista aggiuntiva ricavata dalle lingue del TV (35 ulteriori lingue sul Saba verificato).
 - Cambio lingua della home e del sistema; le app possono usare la lingua del proprio account. I testi della home non tradotti ricadono sull'inglese.
 - Rotella per il cambio lingua pubblico, icona utente per il proprietario.
 - Prepara nuovi ospiti, ripristina italiano e cambia PIN nell'area protetta.
 - Tastierino numerico con cifre visibili, supporto ai numeri del telecomando e Annulla largo quanto il blocco numerico.
-- Sfondo petrolio, elementi vettoriali statici e fila app stabilizzata nella parte bassa. Nessuna animazione aggiunta o immagine remota.
+- Sfondo petrolio, elementi vettoriali statici e fila app stabilizzata nella parte bassa. La home rimane statica, senza immagini remote; il solo benvenuto anima due testi nativi per 420 ms ogni 3,2 secondi e si ferma quando non è visibile.
 - Home diretto alla nuova interfaccia e blocco del solo tasto IR Google Play di questo modello. TV Live, Netflix, YouTube, Prime e volume vengono passati al sistema.
 
 La versione 3.3 include la pulizia di **tutte e quattro le app** e il controllo della rimozione di **tutti gli account Google dal TV**. Il nuovo soggiorno viene attivato solo dopo aver completato i cinque passaggi. Sul TV attuale la pulizia richiede le impostazioni Android: non è ancora configurato come dispositivo amministrato. Dettagli, limiti e percorso automatico opzionale in [docs/RESET-OSPITI.md](docs/RESET-OSPITI.md).
