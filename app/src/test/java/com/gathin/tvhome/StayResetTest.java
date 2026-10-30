@@ -9,15 +9,17 @@ public class StayResetTest {
         assertTrue(StayReset.complete(results));
         for(int i=0;i<StayReset.STEPS;i++) {
             String saved=results[i];
-            for(String incomplete:new String[]{"",null,"errore","in corso","da verificare"}) {
+            for(String incomplete:new String[]{"",null,"errore","in corso"}) {
                 results[i]=incomplete;
                 assertFalse(StayReset.complete(results));
             }
             results[i]=saved;
         }
     }
-    @Test public void googleRequiresExplicitManualCheckEvenAfterAppReset() {
-        assertFalse(StayReset.complete(new String[]{"automatico","automatico","automatico","automatico","automatico"}));
+    @Test public void googleRequiresVerifiedOrManualCheck() {
+        assertTrue(StayReset.complete(new String[]{"automatico","automatico","automatico","automatico","automatico"}));
+        assertTrue(StayReset.complete(new String[]{"da verificare","da verificare","da verificare","da verificare","automatico"}));
+        assertFalse(StayReset.complete(new String[]{"automatico","automatico","automatico","automatico","da verificare"}));
         assertTrue(StayReset.complete(new String[]{"manuale","manuale","manuale","manuale","manuale"}));
         assertFalse(StayReset.complete(new String[0]));
         assertFalse(StayReset.complete(new String[6]));

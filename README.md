@@ -15,7 +15,7 @@ La home ospiti mostra TV antenna, YouTube, Netflix, Prime Video e Spotify. L'are
 - Sfondo petrolio, elementi vettoriali statici e fila app stabilizzata nella parte bassa. La home rimane statica, senza immagini remote; il solo benvenuto anima due testi nativi per 420 ms ogni 3,2 secondi e si ferma quando non è visibile.
 - Home diretto alla nuova interfaccia e blocco del solo tasto IR Google Play di questo modello. TV Live, Netflix, YouTube, Prime e volume vengono passati al sistema.
 
-La versione 3.3 include la pulizia di **tutte e quattro le app** e il controllo della rimozione di **tutti gli account Google dal TV**. Il nuovo soggiorno viene attivato solo dopo aver completato i cinque passaggi. Sul Saba la pulizia può essere avviata dalla home tramite un servizio Accessibilità dedicato; usa le impostazioni Android e richiede una verifica manuale degli esiti e degli account Google. Dettagli, limiti e percorso automatico opzionale in [docs/RESET-OSPITI.md](docs/RESET-OSPITI.md).
+La versione 3.3 include la pulizia di **tutte e quattro le app** e il controllo della rimozione di **tutti gli account Google dal TV**. Il nuovo soggiorno viene attivato solo dopo aver completato i cinque passaggi. Sul Saba la pulizia può essere avviata dalla home tramite un servizio Accessibilità dedicato; usa le impostazioni Android e mostra gli esiti delle richieste e controlla se Android indica che non ci sono account Google; in presenza di account, occorre rimuoverli manualmente. Dettagli, limiti e percorso automatico opzionale in [docs/RESET-OSPITI.md](docs/RESET-OSPITI.md).
 
 ## Stato delle verifiche
 

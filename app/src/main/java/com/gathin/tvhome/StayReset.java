@@ -8,10 +8,9 @@ final class StayReset {
     static final int STEPS = 5;
     static boolean complete(String[] results) {
         if (results.length != STEPS) return false;
-        for (String result : results)
-            if (!"automatico".equals(result) && !"manuale".equals(result)) return false;
-        // Google accounts always require the owner's explicit check in system settings.
-        return "manuale".equals(results[4]);
+        for (int i=0;i<PACKAGES.length;i++)
+            if (!"automatico".equals(results[i]) && !"manuale".equals(results[i]) && !"da verificare".equals(results[i])) return false;
+        return "manuale".equals(results[4]) || "automatico".equals(results[4]);
     }
     private StayReset() {}
 }

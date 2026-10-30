@@ -41,7 +41,16 @@ public final class GuestCleanupService extends AccessibilityService {
     }
     private void next() {
         if(!running)return;
-        if(index==StayReset.PACKAGES.length) { stop(true);return; }
+        if(index==StayReset.PACKAGES.length) {
+            if(!GuestActivity.prefs(this).edit().remove("reset_step_4").commit()) {stop(true);return;}
+            message.setText("Controllo account Google");
+            phase=3;deadline=android.os.SystemClock.elapsedRealtime()+15000;
+            try {
+                startActivity(new Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK));
+                schedule(600);
+            } catch(RuntimeException e) {stop(true);}
+            return;
+        }
         if(!session.equals(GuestActivity.prefs(this).getString("reset_session",""))) {stop(false);return;}
         try {
             message.setText("Pulizia app in corso\n"+StayReset.LABELS[index]+" · "+(index+1)+" / 4");
@@ -61,7 +70,16 @@ public final class GuestCleanupService extends AccessibilityService {
         AccessibilityNodeInfo root=getRootInActiveWindow();
         if(root==null || !"com.android.tv.settings".contentEquals(root.getPackageName())) {schedule(500);return;}
         try {
-            if(phase==0 && has(root,"android:id/summary",StayReset.PACKAGES[index])
+            if(phase==3) {
+                if(noAccounts(root)) {
+                    if(!session.equals(GuestActivity.prefs(this).getString("reset_session",""))
+                            || !GuestActivity.prefs(this).edit().putString("reset_step_4","automatico").commit()) {stop(true);return;}
+                    android.util.Log.i("GuestCleanup","Android reports no accounts");stop(true);return;
+                }
+                if(has(root,"android:id/title","Account e accesso")) {
+                    android.util.Log.i("GuestCleanup","Accounts require manual removal");stop(true);return;
+                }
+            } else if(phase==0 && has(root,"android:id/summary",StayReset.PACKAGES[index])
                     && click(root,"android:id/title","Cancellare dati")) {
                 android.util.Log.i("GuestCleanup","Opened confirmation step="+index);phase=1;deadline=android.os.SystemClock.elapsedRealtime()+15000;
             } else if(phase==1 && has(root,"com.android.tv.settings:id/guidance_breadcrumb",label)
@@ -77,6 +95,20 @@ public final class GuestCleanupService extends AccessibilityService {
             }
         }finally {root.recycle();}
         schedule(500);
+    }
+    /** Only accept Android's explicit empty-account summary in the Accounts row. */
+    private boolean noAccounts(AccessibilityNodeInfo root) {
+        for(AccessibilityNodeInfo title:root.findAccessibilityNodeInfosByViewId("android:id/title")) {
+            if(!"Account e accesso".contentEquals(title.getText()==null?"":title.getText())) {title.recycle();continue;}
+            AccessibilityNodeInfo row=title.getParent();
+            while(row!=null) {
+                if(has(row,"android:id/summary","Nessun account")) {row.recycle();title.recycle();return true;}
+                if(row.isClickable()) {row.recycle();break;}
+                AccessibilityNodeInfo parent=row.getParent();row.recycle();row=parent;
+            }
+            title.recycle();
+        }
+        return false;
     }
     private boolean has(AccessibilityNodeInfo root,String id,String text) {
         for(AccessibilityNodeInfo n:root.findAccessibilityNodeInfosByViewId(id)) {

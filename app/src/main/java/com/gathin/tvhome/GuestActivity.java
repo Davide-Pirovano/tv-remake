@@ -78,7 +78,7 @@ public final class GuestActivity extends Activity {
         }
         if (getIntent().getBooleanExtra("cleanup_return",false) && cleanupReturnAuthorized
                 && prefs(this).getBoolean("reset_pending",false)) {
-            cleanupReturnAuthorized=false;authenticated=true;resetProgress();
+            cleanupReturnAuthorized=false;authenticated=true;cleanupResults();
         } else if (getIntent().getBooleanExtra("owner", false)) login();
         else if (prefs(this).getBoolean("reset_pending", false)) resetLocked();
         else if (getIntent().getBooleanExtra("settings", false)) languages();
@@ -303,22 +303,30 @@ public final class GuestActivity extends Activity {
         });
         if(resetJobs>0)button("Aggiorna esiti — pulizia in corso",this::resetProgress);
         String[] results=resetResults();
-        boolean allRequested=true;
-        for(int i=0;i<StayReset.PACKAGES.length;i++) {
-            if(!"da verificare".equals(results[i]) && !"automatico".equals(results[i]) && !"manuale".equals(results[i]))allRequested=false;
-        }
-        if(allRequested)button("Conferma verifica delle app",()->new AlertDialog.Builder(this)
-                .setTitle("Hai verificato le quattro app?")
-                .setMessage("Android non comunica alla home l’esito della cancellazione. Conferma solo dopo aver controllato che Prime Video, Spotify, Netflix e YouTube non mostrino gli account precedenti.")
-                .setNegativeButton("Annulla",null).setPositiveButton("Ho verificato",(d,w)->{
-                    SharedPreferences.Editor edit=prefs(this).edit();
-                    for(int i=0;i<StayReset.PACKAGES.length;i++)edit.putString("reset_step_"+i,"manuale");
-                    if(edit.commit())resetProgress();else toast("Conferma non salvata. Riprova.");
-                }).show());
         button("Account Google del TV · "+(results[4].isEmpty()?"Da completare":"OK"),()->resetStep(4));
         Button finish=button("Completa e ripristina italiano",this::finishReset);
         finish.setEnabled(resetJobs==0 && StayReset.complete(results));
         button("Esci — riprenderai dopo il PIN",this::finish);
+    }
+    private void cleanupResults() {
+        if(!authenticated) {login();return;}
+        String[] results=resetResults();
+        page(StayReset.complete(results)?"Richieste inviate":"Pulizia da completare", "Android non conferma direttamente l’eliminazione dei dati: le richieste inviate vanno verificate nelle app.");
+        for(int i=0;i<StayReset.PACKAGES.length;i++) {
+            String result=results[i];
+            String status="automatico".equals(result)?"Cancellazione confermata":
+                    "manuale".equals(result)?"Verificata manualmente":
+                    "da verificare".equals(result)?"Richiesta inviata · da verificare":"Non completata";
+            TextView row=new TextView(this);row.setText(StayReset.LABELS[i]+" · "+status);
+            row.setTextColor(GuestStyle.MIST);row.setTextSize(18);row.setGravity(Gravity.CENTER);
+            row.setPadding(0,dp(4),0,dp(4));panel.addView(row);
+        }
+        TextView accounts=new TextView(this);accounts.setTextColor(GuestStyle.MIST);accounts.setTextSize(18);
+        accounts.setGravity(Gravity.CENTER);accounts.setPadding(0,dp(4),0,dp(4));
+        accounts.setText("Account Google · "+("automatico".equals(results[4])?"Nessun account sul TV":
+                "manuale".equals(results[4])?"Controllati manualmente":"Da rimuovere o verificare"));panel.addView(accounts);
+        if(StayReset.complete(results))button("Continua",this::finishReset).requestFocus();
+        else button("Torna alla pulizia",this::resetProgress).requestFocus();
     }
     private void startAccessibleCleanup() {
         if(!authenticated || !GuestCleanupService.available() || GuestCleanupService.active())return;
