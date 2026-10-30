@@ -67,6 +67,14 @@ public final class GuestActivity extends Activity {
                 }
             }
         } catch (Exception e) { page("Configurazione non disponibile", "Contattare il proprietario."); return; }
+        if(prefs(this).getBoolean("reset_pending",false) && !managedResetAvailable()
+                && !prefs(this).getBoolean("cleanup_results_checked",false)) {
+            SharedPreferences.Editor migration=prefs(this).edit().putBoolean("cleanup_results_checked",true);
+            for(int i=0;i<StayReset.PACKAGES.length;i++)
+                if("automatico".equals(prefs(this).getString("reset_step_"+i,"")))
+                    migration.putString("reset_step_"+i,"da verificare");
+            migration.commit();
+        }
         if (getIntent().getBooleanExtra("owner", false)) login();
         else if (prefs(this).getBoolean("reset_pending", false)) resetLocked();
         else if (getIntent().getBooleanExtra("settings", false)) guestSettings();
@@ -257,7 +265,9 @@ public final class GuestActivity extends Activity {
                             .putString("reset_session",java.util.UUID.randomUUID().toString());
                     for(int i=0;i<StayReset.STEPS;i++)edit.remove("reset_step_"+i);
                     if(edit.commit()) {
-                        if(managedResetAvailable())clearStreamingApps(); else resetProgress();
+                        if(managedResetAvailable())clearStreamingApps();
+                        else if(GuestCleanupService.available())startAccessibleCleanup();
+                        else resetProgress();
                     } else toast("Impossibile salvare. Reset non iniziato.");
                 }).show());
         button("Annulla",this::ownerMenu); name.requestFocus();
@@ -277,19 +287,45 @@ public final class GuestActivity extends Activity {
     }
     private void resetProgress() {
         if(!authenticated) {login();return;}
-        page("Pulizia per nuovi ospiti", "Apri ogni passaggio e conferma la pulizia. Il progresso rimane salvato anche uscendo o riavviando.\nI profili e le lingue salvati online non vengono modificati.");
+        page("Pulizia per nuovi ospiti", "Avvia la pulizia delle quattro app e controlla gli esiti.\nI profili e le lingue salvati online non vengono modificati.");
         if(managedResetAvailable())button("Azzera automaticamente le quattro app",this::clearStreamingApps).setEnabled(resetJobs==0);
+        else if(GuestCleanupService.available())button("Pulisci automaticamente le quattro app",this::startAccessibleCleanup).setEnabled(!GuestCleanupService.active());
+        else button("Attiva pulizia automatica",()->{
+            externalResetSettings=true;
+            try {startActivity(new Intent(Settings.ACTION_SETTINGS));}
+            catch(android.content.ActivityNotFoundException | SecurityException e) {
+                externalResetSettings=false;toast("Apri Accessibilità dalle impostazioni del TV.");
+            }
+        });
         if(resetJobs>0)button("Aggiorna esiti — pulizia in corso",this::resetProgress);
         String[] results=resetResults();
-        for(int i=0;i<StayReset.STEPS;i++) {
-            final int step=i;
-            String status=results[i].isEmpty()?"Da completare":"OK · "+results[i];
-            Button next=button(StayReset.LABELS[i]+" · "+status,()->resetStep(step));
-            if(i==0)next.requestFocus();
+        boolean allRequested=true;
+        for(int i=0;i<StayReset.PACKAGES.length;i++) {
+            String status=results[i].isEmpty()?"Da completare":("da verificare".equals(results[i])?"Verifica richiesta":"OK · "+results[i]);
+            TextView row=new TextView(this);row.setText(StayReset.LABELS[i]+" · "+status);
+            row.setTextColor(GuestStyle.MIST);row.setTextSize(16);row.setGravity(Gravity.CENTER);
+            row.setPadding(0,dp(3),0,dp(3));panel.addView(row);
+            if(!"da verificare".equals(results[i]) && !"automatico".equals(results[i]) && !"manuale".equals(results[i]))allRequested=false;
         }
+        if(allRequested)button("Conferma verifica delle app",()->new AlertDialog.Builder(this)
+                .setTitle("Hai verificato le quattro app?")
+                .setMessage("Android non comunica alla home l’esito della cancellazione. Conferma solo dopo aver controllato che Prime Video, Spotify, Netflix e YouTube non mostrino gli account precedenti.")
+                .setNegativeButton("Annulla",null).setPositiveButton("Ho verificato",(d,w)->{
+                    SharedPreferences.Editor edit=prefs(this).edit();
+                    for(int i=0;i<StayReset.PACKAGES.length;i++)edit.putString("reset_step_"+i,"manuale");
+                    if(edit.commit())resetProgress();else toast("Conferma non salvata. Riprova.");
+                }).show());
+        button("Account Google del TV · "+(results[4].isEmpty()?"Da completare":"OK"),()->resetStep(4));
         Button finish=button("Completa e ripristina italiano",this::finishReset);
         finish.setEnabled(resetJobs==0 && StayReset.complete(results));
         button("Esci — riprenderai dopo il PIN",this::finish);
+    }
+    private void startAccessibleCleanup() {
+        if(!authenticated || !GuestCleanupService.available() || GuestCleanupService.active())return;
+        if(!systemLanguage("it") && !"it".equals(android.content.res.Resources.getSystem().getConfiguration().getLocales().get(0).getLanguage())) {
+            toast("Imposta prima l’italiano nelle impostazioni TV.");return;
+        }
+        GuestCleanupService.begin();
     }
     private void resetStep(int step) {
         if(!authenticated) {login();return;}

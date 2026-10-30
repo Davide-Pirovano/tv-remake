@@ -9,7 +9,7 @@ public class StayResetTest {
         assertTrue(StayReset.complete(results));
         for(int i=0;i<StayReset.STEPS;i++) {
             String saved=results[i];
-            for(String incomplete:new String[]{"",null,"errore","in corso"}) {
+            for(String incomplete:new String[]{"",null,"errore","in corso","da verificare"}) {
                 results[i]=incomplete;
                 assertFalse(StayReset.complete(results));
             }

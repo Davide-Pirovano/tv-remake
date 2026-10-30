@@ -2,9 +2,17 @@
 
 Nell'area protetta: **Prepara per nuovi ospiti**, inserisci facoltativamente il nome, quindi conferma. La procedura riguarda sempre Prime Video, Spotify, Netflix, YouTube e tutti gli account Google configurati nel profilo Android corrente del televisore. Non elimina account o profili dai servizi online. PIN del proprietario, Wi-Fi, canali e launcher rimangono conservati.
 
-## Sul Saba attualmente configurato
+## Prova sul Saba — versione 3.11
 
-Android non concede a un normale launcher il permesso di cancellare i dati delle altre app. Il servizio Accessibilità usato per Home e Google Play non viene esteso per leggere o azionare le impostazioni.
+Il servizio Accessibilità separato **Pulizia app ospiti** è stato attivato dal proprietario. Quando viene avviato dal PIN, usa esclusivamente la pagina delle impostazioni Android delle quattro app: verifica nome package, intestazione della conferma e pulsante OK, con un limite di tempo per ogni passaggio. Un caricamento copre l'interfaccia; le impostazioni restano comunque in primo piano. Il servizio non controlla lo schermo al di fuori della pulizia e non modifica il servizio del telecomando.
+
+Sul TV, il 30 ottobre 2026, il servizio ha raggiunto le conferme e fatto ritorno alle informazioni di tutte e quattro le app. **Il ritorno dalla schermata non è un callback di successo:** non prova che dati o account siano stati cancellati. La home indica «Verifica richiesta», e chiede una conferma esplicita soltanto dopo aver verificato le quattro app. Gli esiti automaticamente segnati dalla prima versione sul Saba vengono riclassificati come da verificare. Gli account Google del sistema devono essere rimossi e verificati separatamente. Lingue dei profili online non vengono modificate.
+
+Il precedente tentativo si fermava alla terza app perché Android riapriva la schermata precedente. La 3.11 usa una nuova schermata per ciascuna app ed è arrivata anche a YouTube. Testare nuovamente dopo aggiornamenti di Android, modifiche della lingua o dell'interfaccia delle impostazioni; in caso di schermata inattesa il servizio si interrompe senza segnare il passaggio come confermato.
+
+## Procedura dalle impostazioni
+
+Android non concede a un normale launcher il permesso di cancellare i dati delle altre app. Il servizio del telecomando è separato da quello di pulizia.
 
 La procedura guidata funziona così:
 
