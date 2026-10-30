@@ -124,10 +124,11 @@ public final class GuestCleanupService extends AccessibilityService {
             try {getSystemService(android.view.WindowManager.class).removeView(overlay);}catch(RuntimeException ignored){}
             overlay=null;message=null;
         }
+        if(!show)GuestActivity.cancelCleanupReturn();
         if(show && wasRunning) {
-            try {startActivity(new Intent(this,GuestActivity.class).putExtra("owner",true)
+            try {startActivity(new Intent(this,GuestActivity.class).putExtra("owner",true).putExtra("cleanup_return",true)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP));}
-            catch(RuntimeException ignored){}
+            catch(RuntimeException ignored){GuestActivity.cancelCleanupReturn();}
         }
     }
 }

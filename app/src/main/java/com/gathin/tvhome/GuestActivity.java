@@ -35,6 +35,7 @@ import javax.crypto.spec.PBEKeySpec;
 public final class GuestActivity extends Activity {
     private LinearLayout panel;
     private boolean authenticated;
+    private static boolean cleanupReturnAuthorized;
     private boolean externalResetSettings;
     private static int resetJobs; // Main-thread callbacks only; no background polling.
     private PinPad activePinPad;
@@ -75,9 +76,12 @@ public final class GuestActivity extends Activity {
                     migration.putString("reset_step_"+i,"da verificare");
             migration.commit();
         }
-        if (getIntent().getBooleanExtra("owner", false)) login();
+        if (getIntent().getBooleanExtra("cleanup_return",false) && cleanupReturnAuthorized
+                && prefs(this).getBoolean("reset_pending",false)) {
+            cleanupReturnAuthorized=false;authenticated=true;resetProgress();
+        } else if (getIntent().getBooleanExtra("owner", false)) login();
         else if (prefs(this).getBoolean("reset_pending", false)) resetLocked();
-        else if (getIntent().getBooleanExtra("settings", false)) guestSettings();
+        else if (getIntent().getBooleanExtra("settings", false)) languages();
         else if (prefs(this).getBoolean("welcome_seen", false)) languages();
         else welcome();
     }
@@ -301,10 +305,6 @@ public final class GuestActivity extends Activity {
         String[] results=resetResults();
         boolean allRequested=true;
         for(int i=0;i<StayReset.PACKAGES.length;i++) {
-            String status=results[i].isEmpty()?"Da completare":("da verificare".equals(results[i])?"Verifica richiesta":"OK · "+results[i]);
-            TextView row=new TextView(this);row.setText(StayReset.LABELS[i]+" · "+status);
-            row.setTextColor(GuestStyle.MIST);row.setTextSize(16);row.setGravity(Gravity.CENTER);
-            row.setPadding(0,dp(3),0,dp(3));panel.addView(row);
             if(!"da verificare".equals(results[i]) && !"automatico".equals(results[i]) && !"manuale".equals(results[i]))allRequested=false;
         }
         if(allRequested)button("Conferma verifica delle app",()->new AlertDialog.Builder(this)
@@ -325,8 +325,10 @@ public final class GuestActivity extends Activity {
         if(!systemLanguage("it") && !"it".equals(android.content.res.Resources.getSystem().getConfiguration().getLocales().get(0).getLanguage())) {
             toast("Imposta prima l’italiano nelle impostazioni TV.");return;
         }
+        cleanupReturnAuthorized=true;
         GuestCleanupService.begin();
     }
+    static void cancelCleanupReturn() {cleanupReturnAuthorized=false;}
     private void resetStep(int step) {
         if(!authenticated) {login();return;}
         if(resetJobs>0) {toast("Attendi la pulizia automatica, poi aggiorna gli esiti.");return;}

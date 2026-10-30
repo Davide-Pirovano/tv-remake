@@ -28,7 +28,7 @@ final class PinPad extends LinearLayout {
             addView(line,new LayoutParams(LayoutParams.WRAP_CONTENT,dp(46)));
             for(int col=0;col<3;col++) {
                 int index=row*3+col;Button b=new Button(context);keys[index]=b;b.setId(View.generateViewId());
-                b.setText(labels[index]);b.setTextSize(21);GuestStyle.button(b,index==11);
+                b.setText(labels[index]);b.setTextSize(21);GuestStyle.button(b,false);
                 b.setMinWidth(0);b.setMinimumWidth(0);b.setMinHeight(0);b.setMinimumHeight(0);b.setPadding(0,0,0,0);
                 LayoutParams lp=new LayoutParams(dp(96),dp(40));lp.setMargins(dp(3),dp(3),dp(3),dp(3));line.addView(b,lp);
                 if(index==9)b.setContentDescription("Cancella ultima cifra");

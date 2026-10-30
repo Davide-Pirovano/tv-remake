@@ -11,8 +11,8 @@ android {
         applicationId 'it.saba.guesthome'
         minSdk 26
         targetSdk 34
-        versionCode 20
-        versionName '3.11-saba'
+        versionCode 21
+        versionName '3.12-saba'
     }
 
     buildTypes {

@@ -44,6 +44,7 @@ public final class PlayKeyBlocker extends AccessibilityService {
     @Override protected boolean onKeyEvent(KeyEvent event) {
         if(event.getKeyCode()==KeyEvent.KEYCODE_HOME){
             if(event.getAction()==KeyEvent.ACTION_UP&&!event.isCanceled()){
+                GuestActivity.cancelCleanupReturn();
                 android.util.Log.i("GuestTV","Home key routed to guest home");guestHome();
             }
             return true;
