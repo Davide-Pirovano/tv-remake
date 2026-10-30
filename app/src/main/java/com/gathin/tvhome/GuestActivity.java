@@ -35,6 +35,7 @@ import javax.crypto.spec.PBEKeySpec;
 public final class GuestActivity extends Activity {
     private LinearLayout panel;
     private boolean authenticated;
+    private boolean externalResetSettings;
     private static int resetJobs; // Main-thread callbacks only; no background polling.
     private PinPad activePinPad;
     private GuestWelcomeView welcomeView;
@@ -255,7 +256,9 @@ public final class GuestActivity extends Activity {
                             .putString("reset_guest",name.getText().toString().trim())
                             .putString("reset_session",java.util.UUID.randomUUID().toString());
                     for(int i=0;i<StayReset.STEPS;i++)edit.remove("reset_step_"+i);
-                    if(edit.commit())resetProgress(); else toast("Impossibile salvare. Reset non iniziato.");
+                    if(edit.commit()) {
+                        if(managedResetAvailable())clearStreamingApps(); else resetProgress();
+                    } else toast("Impossibile salvare. Reset non iniziato.");
                 }).show());
         button("Annulla",this::ownerMenu); name.requestFocus();
     }
@@ -296,12 +299,15 @@ public final class GuestActivity extends Activity {
                 ?"Nelle impostazioni del TV rimuovi TUTTI gli account Google. Uscire soltanto da YouTube non basta. Se non ci sono account, conferma dopo aver controllato."
                 :"Apri le informazioni dell’app, poi Memoria → Cancella dati / Cancella tutti i dati. Svuotare soltanto la cache o uscire dall’account non basta. Se l’app non è installata, verifica prima di confermare.");
         button("Apri impostazioni Android",()->{
-            Intent intent=accounts?new Intent(Settings.ACTION_SYNC_SETTINGS)
+            Intent intent=accounts?new Intent(Settings.ACTION_SETTINGS)
                     :new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,android.net.Uri.parse("package:"+StayReset.PACKAGES[step]));
+            externalResetSettings=true;
             try {startActivity(intent);}
             catch(android.content.ActivityNotFoundException|SecurityException e) {
                 try {startActivity(new Intent(Settings.ACTION_SETTINGS));}
-                catch(android.content.ActivityNotFoundException|SecurityException ignored){toast("Impostazioni non disponibili: aprirle dal telecomando.");}
+                catch(android.content.ActivityNotFoundException|SecurityException ignored){
+                    externalResetSettings=false;toast("Impostazioni non disponibili: aprirle dal telecomando.");
+                }
             }
         }).requestFocus();
         button(accounts?"Conferma account Google rimossi":"Conferma dati cancellati / app assente",()->
@@ -408,13 +414,24 @@ public final class GuestActivity extends Activity {
         super.onStart();
         if(welcomeView!=null)welcomeView.start();
     }
+    @Override protected void onResume() {
+        super.onResume();
+        if(externalResetSettings && !authenticated) {
+            externalResetSettings=false;
+            login();
+        }
+    }
+    @Override protected void onPause() {
+        if(externalResetSettings)authenticated=false;
+        super.onPause();
+    }
     @Override protected void onStop() {
         if(welcomeView!=null)welcomeView.stop();
         super.onStop();
         // Owner access ends when leaving this activity, including opening the TV settings.
         if (authenticated && getIntent().getBooleanExtra("owner", false)) {
             authenticated = false;
-            finish();
+            if(!externalResetSettings)finish();
         }
     }
     @Override public void onBackPressed() {
